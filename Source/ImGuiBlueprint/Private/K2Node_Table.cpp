@@ -5,12 +5,13 @@
 
 #include "imgui.h"
 
-UK2Node_Table* UK2Node_Table::ImGui_Table(TArray<FString> Columns, int32 RowAmount, FVector2D Size)
+UK2Node_Table* UK2Node_Table::ImGui_Table(TArray<FString> Columns, int32 RowAmount, FVector2D Size, FString TableName)
 {
 	UK2Node_Table* NewAsyncObject = NewObject<UK2Node_Table>();
 	NewAsyncObject->ColumnNames = Columns;
 	NewAsyncObject->RowAmounts = RowAmount;
 	NewAsyncObject->TableSize = Size;
+	NewAsyncObject->TableID = TableName;
 	return NewAsyncObject;
 }
 
@@ -20,10 +21,17 @@ void UK2Node_Table::Activate()
 	ImGuiTableFlags flags =
 		   ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_SortMulti
 		   | ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_NoBordersInBody
-		   | ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY
-		   | ImGuiTableFlags_SizingFixedFit;
+	       | ImGuiTableFlags_SizingFixedFit | ImGuiTreeNodeFlags_DefaultOpen;
+
+	//Tables greedily take up all space without this flag, but will behave
+	//oddly when it has this flag, but has a set size.
+	//Only add the flag if sizing is set to 0.
+	if(TableSize != FVector2D(0))
+	{
+		flags += ImGuiTableFlags_ScrollY;
+	}
 	
-	if(ImGui::BeginTable("table advanced", ColumnNames.Num(), flags, ImVec2(TableSize.X, TableSize.Y)))
+	if(ImGui::BeginTable( TCHAR_TO_UTF8(*TableID), ColumnNames.Num(), flags, ImVec2(TableSize.X, TableSize.Y)))
 	{
 		//Create the columns
 		for(auto& CurrentColumn : ColumnNames)
@@ -41,7 +49,6 @@ void UK2Node_Table::Activate()
 			//Iterate over all the columns and start filling them.
 			for(int32 ColumnIndex = 0; ColumnIndex < ColumnNames.Num(); ColumnIndex++)
 			{
-				
 				ImGui::TableSetColumnIndex(ColumnIndex);
 				RowCreated.Broadcast(ColumnIndex, RowIndex);
 			}
@@ -49,4 +56,8 @@ void UK2Node_Table::Activate()
 		
 		ImGui::EndTable();
 	}
+
+	TableFinished.Broadcast();
+
+	
 }

@@ -29,10 +29,15 @@ class IMGUIBLUEPRINT_API UK2Node_Table : public UBlueprintAsyncActionBase
 	UPROPERTY()
 	FVector2D TableSize;
 
+	/**Tables seem to bug out if all of them have the same ID.
+	 * The resizing will break, so each table needs a unique ID*/
+	UPROPERTY()
+	FString TableID;
+
 public:
 
 	UFUNCTION(Category="ImGui|Menus", BlueprintCallable, meta=(BlueprintInternalUseOnly="true"))
-	static UK2Node_Table* ImGui_Table(TArray<FString> Columns, int32 RowAmount, FVector2D Size);
+	static UK2Node_Table* ImGui_Table(TArray<FString> Columns, int32 RowAmount, FVector2D Size, FString TableName);
 
 	virtual void Activate() override;
 };
