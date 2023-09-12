@@ -118,9 +118,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="ImGui|Basic")
 	static bool ImGui_Checkbox(FString Text, UPARAM(ref) bool& BoolToUpdate)
 	{
-		static bool Value;
-		bool Pressed =  ImGui::Checkbox(TCHAR_TO_UTF8(*Text), &Value);
-		BoolToUpdate = Value;
+		bool Pressed =  ImGui::Checkbox(TCHAR_TO_UTF8(*Text), &BoolToUpdate);
 		return Pressed;
 	}
 
