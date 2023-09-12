@@ -4,6 +4,7 @@
 #include "K2Node_Table.h"
 
 #include "imgui.h"
+#include "ImGuiBlueprintLibrary.h"
 
 UK2Node_Table* UK2Node_Table::ImGui_Table(TArray<FString> Columns, int32 RowAmount, FVector2D Size, FString TableName)
 {
@@ -30,7 +31,7 @@ void UK2Node_Table::Activate()
 	{
 		flags += ImGuiTableFlags_ScrollY;
 	}
-	
+	ImGui::PushID(UImGuiBlueprintLibrary::GetID());
 	if(ImGui::BeginTable( TCHAR_TO_UTF8(*TableID), ColumnNames.Num(), flags, ImVec2(TableSize.X, TableSize.Y)))
 	{
 		//Create the columns
@@ -55,6 +56,7 @@ void UK2Node_Table::Activate()
 		}
 		
 		ImGui::EndTable();
+		ImGui::PopID();
 	}
 
 	TableFinished.Broadcast();

@@ -41,3 +41,9 @@ bool UImGui_Subsystem::RemoveDebuggerByIdentifier(FName Identifier)
 
 	return false;
 }
+
+char* UImGui_Subsystem::GetID()
+{
+	IDCounter++;
+	return TCHAR_TO_UTF8(*FString::FromInt(IDCounter));
+}

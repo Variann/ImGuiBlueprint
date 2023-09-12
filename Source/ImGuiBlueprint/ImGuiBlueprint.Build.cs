@@ -26,7 +26,7 @@ public class ImGuiBlueprint : ModuleRules
 			new string[]
 			{
 				"Core",
-				"ImGui"
+				"ImGui", "Engine"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);

@@ -28,4 +28,16 @@ public:
 
 	UFUNCTION(Category="ImGui Subsystem", BlueprintCallable)
 	bool RemoveDebuggerByIdentifier(FName Identifier);
+
+	int32 IDCounter = 0;
+	
+	char* GetID();
+
+	/**Many ImGui widgets need an ID and this is mostly automated.
+	 * Although, at some point you need to reset it.
+	 * This should be at the beginning of your tick event, so
+	 * after the UI has been made, all the widgets can get the
+	 * same ID again.*/
+	UFUNCTION(Category="ImGui Subsystem", BlueprintCallable)
+	void ResetID() { IDCounter = 0; }
 };

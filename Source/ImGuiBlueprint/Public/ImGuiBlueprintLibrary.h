@@ -4,7 +4,9 @@
 
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "imgui.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Subsystem/ImGui_Subsystem.h"
 #include "ImGuiBlueprintLibrary.generated.h"
 
 /* 
@@ -30,6 +32,17 @@ class IMGUIBLUEPRINT_API UImGuiBlueprintLibrary : public UBlueprintFunctionLibra
 	GENERATED_BODY()
 	
 public:
+
+	static char* GetID()
+	{
+		UWorld* World = GEngine->GameViewport->GetWorld(); //Dirty hack to get world context
+		UImGui_Subsystem* GuiSubsystem = UGameplayStatics::GetPlayerController(World, 0)->GetLocalPlayer()->GetSubsystem<UImGui_Subsystem>();
+		if(GuiSubsystem)
+		{
+			return GuiSubsystem->GetID();
+		}
+		return nullptr;
+	}
 	
 	UFUNCTION(BlueprintCallable, Category="ImGui|Basic", BlueprintInternalUseOnly)
 	static bool ImGui_Begin(FText Name)
@@ -51,9 +64,12 @@ public:
 	}
 
 	UFUNCTION(BlueprintCallable, Category="ImGui|Basic", meta=(AdvancedDisplay=1), BlueprintInternalUseOnly)
-	static bool ImGui_Button(FString Text, FVector2D Size)
+	static bool ImGui_Button(FString Text, FString ID, FVector2D Size)
 	{
-		return ImGui::Button(TCHAR_TO_UTF8(*Text), ImVec2(static_cast<float>(Size.X), static_cast<float>(Size.Y)));
+		ImGui::PushID(GetID());
+		bool Pressed = ImGui::Button(TCHAR_TO_UTF8(*Text), ImVec2(static_cast<float>(Size.X), static_cast<float>(Size.Y)));
+		ImGui::PopID();
+		return Pressed;
 	}
 
 	UFUNCTION(BlueprintCallable, Category="ImGui|Basic", meta=(AdvancedDisplay="OffsetFromStartX,Spacing"))
@@ -126,6 +142,38 @@ public:
 	static void ImGui_Separator()
 	{
 		ImGui::Separator();
+	}
+
+	//Helper function so its easy to put enums into the combo box
+	UFUNCTION(BlueprintCallable, Category="ImGui|Helpers")
+	static TArray<FString> ConvertEnumToStringArray(UEnum* EnumToConvert)
+	{
+		TArray<FString> Strings;
+		for(int32 CurrentIndex = 0; CurrentIndex < EnumToConvert->GetMaxEnumValue(); CurrentIndex++)
+		{
+			Strings.Add(EnumToConvert->GetAuthoredNameStringByIndex(CurrentIndex));
+		}
+		return Strings;
+	}
+
+	UFUNCTION(BlueprintCallable, Category="ImGui|Basic")
+	static void ImGui_Combo(FString Text, TArray<FString> Options, UPARAM(ref) int32& Selection)
+	{
+		static ImGuiComboFlags flags = 0;
+		if(ImGui::BeginCombo(TCHAR_TO_UTF8(*Text), TCHAR_TO_UTF8(*Options[Selection]),flags))
+		{
+			for (int n = 0; n < Options.Num(); n++)
+			{
+				const bool is_selected = (Selection == n);
+				if (ImGui::Selectable(TCHAR_TO_UTF8(*Options[n]), is_selected))
+					Selection = n;
+
+				// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+				if (is_selected)
+					ImGui::SetItemDefaultFocus();
+			}
+			ImGui::EndCombo();
+		}
 	}
 
 	// Widgets: Menus
