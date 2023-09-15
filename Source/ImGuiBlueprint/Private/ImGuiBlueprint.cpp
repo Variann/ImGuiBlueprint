@@ -20,5 +20,3 @@ void FImGuiBlueprintModule::ShutdownModule()
 #undef LOCTEXT_NAMESPACE
 	
 IMPLEMENT_MODULE(FImGuiBlueprintModule, ImGuiBlueprint)
-
-//Test commit
